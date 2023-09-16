@@ -17,5 +17,5 @@ Please refer to the below url for accessing documentation ui
 http://localhost:8080/swagger-ui/index.html#/
 (I am assuming spring boot application is running on localHost with port 8080)
 
-github url-
+github url- https://github.com/ajay25641/keycloakAdminRestApi
 
