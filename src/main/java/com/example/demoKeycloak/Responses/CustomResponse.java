@@ -7,6 +7,6 @@ import lombok.Data;
 public class CustomResponse {
     int statusCode;
     String message;
-    String errorMessage;
+    Object errorMessage;
     Object data;
 }

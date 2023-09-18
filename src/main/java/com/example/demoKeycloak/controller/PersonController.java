@@ -2,37 +2,32 @@ package com.example.demoKeycloak.controller;
 
 
 import com.example.demoKeycloak.Responses.CustomResponse;
+import com.example.demoKeycloak.Validations.ValidParam;
 import com.example.demoKeycloak.model.Person;
 import com.example.demoKeycloak.service.PersonService;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.*;
 
 
 @RestController
+@Validated
 public class PersonController {
 
     @Autowired
     private PersonService personService;
 
     @PostMapping("/createuser")
-    public ResponseEntity<CustomResponse> createUser(@Valid @RequestBody Person person, Errors errors){
+    public ResponseEntity<CustomResponse> createUser(@Valid @RequestBody Person person){
 
-        CustomResponse customResponse=new CustomResponse();
-
-        if(errors.hasErrors()){
-            customResponse.setMessage("Some of the field provided by you is not valid or it is missing!");
-            customResponse.setStatusCode(HttpStatus.BAD_REQUEST.value());
-            customResponse.setErrorMessage(errors.toString());
-
-            return ResponseEntity.status(customResponse.getStatusCode()).body(customResponse);
-        }
-
-
+        CustomResponse customResponse;
 
         customResponse=personService.createUser(person);
 
@@ -47,17 +42,9 @@ public class PersonController {
         return ResponseEntity.status(customResponse.getStatusCode()).body(customResponse);
     }
     @GetMapping("/getuserbyid")
-    public ResponseEntity<CustomResponse> getUserById(@RequestParam String id){
+    public ResponseEntity<CustomResponse> getUserById(@ValidParam @RequestParam String id){
 
         CustomResponse customResponse;
-        if(id==null){
-            customResponse=new CustomResponse();
-
-            customResponse.setStatusCode(HttpStatus.BAD_REQUEST.value());
-            customResponse.setMessage("Please provide UserId");
-
-            return ResponseEntity.status(customResponse.getStatusCode()).body(customResponse);
-        }
 
         customResponse=personService.getUserById(id);
 
@@ -66,7 +53,11 @@ public class PersonController {
 
     }
     @GetMapping("/getuserbyfieldname")
-    public ResponseEntity<CustomResponse> getUserByFieldName(@RequestParam(required = false) String email,@RequestParam(required = false) String firstName, @RequestParam(required = false) String lastName, @RequestParam(required = false) String username){
+    public ResponseEntity<CustomResponse> getUserByFieldName(
+            @Email @RequestParam(required = false) String email,
+            @ValidParam @RequestParam(required = false) String firstName,
+            @ValidParam @RequestParam(required = false) String lastName,
+            @ValidParam @RequestParam(required = false) String username){
 
         String fieldName;
         String fieldVal;
@@ -101,15 +92,12 @@ public class PersonController {
         return ResponseEntity.status(customResponse.getStatusCode()).body(customResponse);
     }
     @PutMapping("/updateuser")
-    public ResponseEntity<CustomResponse> updateUser(@RequestBody Person person){
+    public ResponseEntity<CustomResponse> updateUser(@Valid @RequestBody Person person) throws MissingServletRequestParameterException {
 
-        CustomResponse customResponse=new CustomResponse();
+        CustomResponse customResponse;
 
-        if(person.getId()==null){
-            customResponse.setStatusCode(HttpStatus.BAD_REQUEST.value());
-            customResponse.setMessage("Please provide id of the User!");
-
-            return ResponseEntity.status(customResponse.getStatusCode()).body(customResponse);
+        if(person.getId()==null || person.getId().length()<=3){
+            throw new MissingServletRequestParameterException("userId","String");
         }
 
         customResponse=personService.updateUser(person);
@@ -119,16 +107,9 @@ public class PersonController {
 
 
     @DeleteMapping("/deleteuser")
-    public ResponseEntity<CustomResponse> deleteUser(@RequestParam String id){
+    public ResponseEntity<CustomResponse> deleteUser(@ValidParam @RequestParam String id){
 
-        CustomResponse customResponse=new CustomResponse();
-
-        if(id==null){
-            customResponse.setStatusCode(HttpStatus.BAD_REQUEST.value());
-            customResponse.setMessage("Please provide id of the User!");
-
-            return ResponseEntity.status(customResponse.getStatusCode()).body(customResponse);
-        }
+        CustomResponse customResponse;
 
         customResponse=personService.deleteUser(id);
 

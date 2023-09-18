@@ -2,34 +2,31 @@ package com.example.demoKeycloak.controller;
 
 
 import com.example.demoKeycloak.Responses.CustomResponse;
+import com.example.demoKeycloak.Validations.ValidParam;
 import com.example.demoKeycloak.service.KeycloakRoleService;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 
 
 @RestController
+@Validated
 public class KeycloakRoleController {
 
     @Autowired
     private KeycloakRoleService keycloakRoleService;
 
     @PostMapping("/createrole")
-    public ResponseEntity<CustomResponse> createRole(@RequestParam String roleName){
+    public ResponseEntity<CustomResponse> createRole(@ValidParam @RequestParam String roleName){
 
         CustomResponse customResponse;
-
-        if(roleName==null){
-            customResponse=new CustomResponse();
-            customResponse.setStatusCode(HttpStatus.BAD_REQUEST.value());
-            customResponse.setMessage("Please provide roleName");
-
-            return ResponseEntity.status(customResponse.getStatusCode()).body(customResponse);
-        }
 
         customResponse=keycloakRoleService.createRole(roleName);
 
@@ -43,21 +40,11 @@ public class KeycloakRoleController {
     }
 
     @PutMapping("/assignroletouser")
-    public ResponseEntity<CustomResponse> assignRoleToUser(@RequestParam String id, @RequestParam String roleName){
-        CustomResponse customResponse=new CustomResponse();
+    public ResponseEntity<CustomResponse> assignRoleToUser(
+            @ValidParam @RequestParam String id,
+            @ValidParam @RequestParam String roleName){
 
-        if(id==null){
-            customResponse.setMessage("Please provide id of the user!");
-            customResponse.setStatusCode(HttpStatus.BAD_REQUEST.value());
-
-            return ResponseEntity.status(customResponse.getStatusCode()).body(customResponse);
-        }
-        if(roleName==null){
-            customResponse.setMessage("Please provide roleName!");
-            customResponse.setStatusCode(HttpStatus.BAD_REQUEST.value());
-
-            return ResponseEntity.status(customResponse.getStatusCode()).body(customResponse);
-        }
+        CustomResponse customResponse;
 
         customResponse=keycloakRoleService.assignRoleToUser(id,roleName);
 
@@ -66,21 +53,11 @@ public class KeycloakRoleController {
     }
 
     @PutMapping("/revokerolefromuser")
-    public ResponseEntity<CustomResponse> revokeRoleFromUser(@RequestParam String id, @RequestParam String roleName){
-        CustomResponse customResponse=new CustomResponse();
+    public ResponseEntity<CustomResponse> revokeRoleFromUser(
+            @ValidParam @RequestParam String id,
+            @ValidParam @RequestParam String roleName){
 
-        if(id==null){
-            customResponse.setMessage("Please provide id of the user!");
-            customResponse.setStatusCode(HttpStatus.BAD_REQUEST.value());
-
-            return ResponseEntity.status(customResponse.getStatusCode()).body(customResponse);
-        }
-        if(roleName==null){
-            customResponse.setMessage("Please provide roleName!");
-            customResponse.setStatusCode(HttpStatus.BAD_REQUEST.value());
-
-            return ResponseEntity.status(customResponse.getStatusCode()).body(customResponse);
-        }
+        CustomResponse customResponse;
 
         customResponse=keycloakRoleService.revokeRoleFromUser(id, roleName);
 
@@ -90,17 +67,8 @@ public class KeycloakRoleController {
 
 
     @DeleteMapping("/deleterole")
-    public ResponseEntity<CustomResponse> deleteRole(@RequestParam String roleName){
+    public ResponseEntity<CustomResponse> deleteRole(@ValidParam @RequestParam String roleName){
         CustomResponse customResponse;
-
-        if(roleName==null){
-            customResponse=new CustomResponse();
-
-            customResponse.setStatusCode(HttpStatus.BAD_REQUEST.value());
-            customResponse.setMessage("Please provide roleName");
-
-            return ResponseEntity.status(customResponse.getStatusCode()).body(customResponse);
-        }
 
         customResponse=keycloakRoleService.deleteRole(roleName);
 
