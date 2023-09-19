@@ -26,12 +26,11 @@ public class KeycloakRoleController {
     @PostMapping("/createrole")
     public ResponseEntity<CustomResponse> createRole(@ValidParam @RequestParam String roleName){
 
-        CustomResponse customResponse;
-
-        customResponse=keycloakRoleService.createRole(roleName);
+        CustomResponse customResponse=keycloakRoleService.createRole(roleName);
 
         return ResponseEntity.status(customResponse.getStatusCode()).body(customResponse);
     }
+
     @GetMapping("/getallroles")
     public ResponseEntity<CustomResponse> getAllRoles(){
         CustomResponse customResponse=keycloakRoleService.getAllRoles();
@@ -44,12 +43,9 @@ public class KeycloakRoleController {
             @ValidParam @RequestParam String id,
             @ValidParam @RequestParam String roleName){
 
-        CustomResponse customResponse;
-
-        customResponse=keycloakRoleService.assignRoleToUser(id,roleName);
+        CustomResponse customResponse=keycloakRoleService.assignRoleToUser(id,roleName);
 
         return ResponseEntity.status(customResponse.getStatusCode()).body(customResponse);
-
     }
 
     @PutMapping("/revokerolefromuser")
@@ -57,20 +53,15 @@ public class KeycloakRoleController {
             @ValidParam @RequestParam String id,
             @ValidParam @RequestParam String roleName){
 
-        CustomResponse customResponse;
+       CustomResponse customResponse=keycloakRoleService.revokeRoleFromUser(id, roleName);
 
-        customResponse=keycloakRoleService.revokeRoleFromUser(id, roleName);
-
-        return ResponseEntity.status(customResponse.getStatusCode()).body(customResponse);
-
+       return ResponseEntity.status(customResponse.getStatusCode()).body(customResponse);
     }
 
 
     @DeleteMapping("/deleterole")
     public ResponseEntity<CustomResponse> deleteRole(@ValidParam @RequestParam String roleName){
-        CustomResponse customResponse;
-
-        customResponse=keycloakRoleService.deleteRole(roleName);
+        CustomResponse customResponse=keycloakRoleService.deleteRole(roleName);
 
         return ResponseEntity.status(customResponse.getStatusCode()).body(customResponse);
     }

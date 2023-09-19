@@ -11,8 +11,12 @@ import jakarta.validation.constraints.Email;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
+import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,9 +31,7 @@ public class PersonController {
     @PostMapping("/createuser")
     public ResponseEntity<CustomResponse> createUser(@Valid @RequestBody Person person){
 
-        CustomResponse customResponse;
-
-        customResponse=personService.createUser(person);
+        CustomResponse customResponse=personService.createUser(person);
 
         return ResponseEntity.status(customResponse.getStatusCode()).body(customResponse);
 
@@ -44,13 +46,9 @@ public class PersonController {
     @GetMapping("/getuserbyid")
     public ResponseEntity<CustomResponse> getUserById(@ValidParam @RequestParam String id){
 
-        CustomResponse customResponse;
-
-        customResponse=personService.getUserById(id);
+        CustomResponse customResponse=personService.getUserById(id);
 
         return ResponseEntity.status(customResponse.getStatusCode()).body(customResponse);
-
-
     }
     @GetMapping("/getuserbyfieldname")
     public ResponseEntity<CustomResponse> getUserByFieldName(
@@ -62,8 +60,7 @@ public class PersonController {
         String fieldName;
         String fieldVal;
 
-        CustomResponse customResponse=new CustomResponse();
-
+        CustomResponse customResponse;
 
         if(email!=null){
             fieldVal=email;
@@ -82,6 +79,7 @@ public class PersonController {
             fieldName="username";
         }
         else{
+            customResponse=new CustomResponse();
             customResponse.setStatusCode(HttpStatus.BAD_REQUEST.value());
             customResponse.setMessage("Please provide the correct field Name!");
 
@@ -97,7 +95,14 @@ public class PersonController {
         CustomResponse customResponse;
 
         if(person.getId()==null || person.getId().length()<=3){
-            throw new MissingServletRequestParameterException("userId","String");
+
+            customResponse=new CustomResponse();
+
+            customResponse.setStatusCode(HttpStatus.BAD_REQUEST.value());
+            customResponse.setMessage("Unable to update user!");
+            customResponse.setErrorMessage("userId must not be blank!");
+
+            return ResponseEntity.status(customResponse.getStatusCode()).body(customResponse);
         }
 
         customResponse=personService.updateUser(person);
@@ -109,12 +114,9 @@ public class PersonController {
     @DeleteMapping("/deleteuser")
     public ResponseEntity<CustomResponse> deleteUser(@ValidParam @RequestParam String id){
 
-        CustomResponse customResponse;
-
-        customResponse=personService.deleteUser(id);
+        CustomResponse customResponse=personService.deleteUser(id);
 
         return ResponseEntity.status(customResponse.getStatusCode()).body(customResponse);
-
     }
 
 

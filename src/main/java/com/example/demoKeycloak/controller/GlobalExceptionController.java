@@ -37,7 +37,6 @@ public class GlobalExceptionController {
         CustomResponse customResponse=new CustomResponse();
 
         customResponse.setStatusCode(HttpStatus.BAD_REQUEST.value());
-        customResponse.setErrorMessage(ex.getMessage());
         customResponse.setMessage("Some of the field provided by you is not valid or it is missing!");
 
         BindingResult bindingResult=ex.getBindingResult();
