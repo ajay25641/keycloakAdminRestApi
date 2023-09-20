@@ -1,6 +1,7 @@
 package com.example.demoKeycloak.controller;
 
 
+import com.example.demoKeycloak.CustomException.DataNotFoundException;
 import com.example.demoKeycloak.Responses.CustomResponse;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -66,6 +67,18 @@ public class GlobalExceptionController {
                 .message("Invalid param")
                 .statusCode(HttpStatus.BAD_REQUEST.value())
                 .errorMessages(messages)
+                .responseBuilder();
+    }
+
+    @ExceptionHandler(DataNotFoundException.class)
+    public ResponseEntity<CustomResponse> dataNotFoundException(DataNotFoundException ex){
+        String message="not found!";
+
+        return CustomResponse
+                .getBuilder()
+                .message(ex.getCustomMessage()+" "+message)
+                .errorMessages(ex.getMessage())
+                .statusCode(HttpStatus.NOT_FOUND.value())
                 .responseBuilder();
     }
 

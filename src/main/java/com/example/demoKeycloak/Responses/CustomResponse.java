@@ -54,8 +54,7 @@ public class CustomResponse {
             return customResponse;
         }
         public ResponseEntity<CustomResponse> responseBuilder(){
-            CustomResponse customResponse=this.build();
-            return ResponseEntity.status(customResponse.statusCode).body(customResponse);
+            return this.build().responseBuilder();
         }
     }
 

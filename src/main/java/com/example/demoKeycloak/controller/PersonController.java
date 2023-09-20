@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -80,8 +79,6 @@ public class PersonController {
     }
     @PutMapping("/updateuser")
     public ResponseEntity<CustomResponse> updateUser(@Valid @RequestBody Person person) {
-
-        CustomResponse customResponse;
 
         if(person.getId()==null || person.getId().length()<=3){
 

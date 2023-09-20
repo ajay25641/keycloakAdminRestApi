@@ -1,5 +1,6 @@
 package com.example.demoKeycloak.service;
 
+import com.example.demoKeycloak.CustomException.DataNotFoundException;
 import com.example.demoKeycloak.Responses.CustomResponse;
 import com.example.demoKeycloak.model.Person;
 import jakarta.ws.rs.core.Response;
@@ -54,7 +55,12 @@ public class PersonService {
 
         UserRepresentation userRepresentation=keycloak.realm(realm).users().searchByEmail(person.getEmail(),true).get(0);
 
-        return CustomResponse.getBuilder().message("User created successfully.").statusCode(HttpStatus.CREATED.value()).data(userRepresentation).build();
+        return CustomResponse
+                .getBuilder()
+                .message("User created successfully.")
+                .statusCode(HttpStatus.CREATED.value())
+                .data(userRepresentation)
+                .build();
     }
     public CustomResponse getAllUsers() {
         List<UserRepresentation>userRepresentationList=keycloak.realm(realm).users().list();
@@ -84,11 +90,7 @@ public class PersonService {
                     .build();
         }
         catch(Exception e){
-            return CustomResponse.getBuilder()
-                    .message("User not found!")
-                    .errorMessages(e.getMessage())
-                    .statusCode(HttpStatus.NOT_FOUND.value())
-                    .build();
+            throw new DataNotFoundException("User",e.getMessage());
         }
     }
     public CustomResponse getUserByFieldName(String val,String fieldName){
@@ -173,12 +175,7 @@ public class PersonService {
                     .build();
         }
         catch (Exception e){
-
-            return CustomResponse.getBuilder()
-                    .message("User not found with given id!")
-                    .errorMessages(e.getMessage())
-                    .statusCode(HttpStatus.NOT_FOUND.value())
-                    .build();
+               throw new DataNotFoundException("User",e.getMessage());
         }
     }
 }

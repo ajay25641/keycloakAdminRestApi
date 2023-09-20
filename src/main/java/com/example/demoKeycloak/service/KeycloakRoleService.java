@@ -1,6 +1,7 @@
 package com.example.demoKeycloak.service;
 
 
+import com.example.demoKeycloak.CustomException.DataNotFoundException;
 import com.example.demoKeycloak.Responses.CustomResponse;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RoleResource;
@@ -11,8 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -56,8 +55,6 @@ public class KeycloakRoleService {
     }
 
     public CustomResponse getAllRoles(){
-        CustomResponse customResponse=new CustomResponse();
-
         List<RoleRepresentation>roleRepresentationList=keycloak.realm(realm).roles().list();
 
         String message=null;
@@ -84,21 +81,14 @@ public class KeycloakRoleService {
             userResource.toRepresentation();
         }
         catch(Exception e){
-            return CustomResponse.getBuilder()
-                    .statusCode(HttpStatus.NOT_FOUND.value())
-                    .message("User with given id not found!")
-                    .errorMessages(e.getMessage()).build();
+            throw new DataNotFoundException("User",e.getMessage());
         }
 
         try{
             roleRepresentation=roleResource.toRepresentation();
         }
         catch (Exception e){
-            return CustomResponse.getBuilder()
-                    .statusCode(HttpStatus.NOT_FOUND.value())
-                    .message("Role with given name does not exists!")
-                    .errorMessages(e.getMessage()).build();
-
+            throw new DataNotFoundException("Role",e.getMessage());
         }
 
         userResource.roles().realmLevel().add(Collections.singletonList(roleRepresentation));
@@ -112,8 +102,6 @@ public class KeycloakRoleService {
     }
 
     public CustomResponse revokeRoleFromUser(String userId,String roleName){
-        CustomResponse customResponse=new CustomResponse();
-
         UserResource userResource=keycloak.realm(realm).users().get(userId);
 
         UserRepresentation userRepresentation;
@@ -123,10 +111,7 @@ public class KeycloakRoleService {
             userResource.toRepresentation();
         }
         catch(Exception e){
-            return CustomResponse.getBuilder()
-                    .statusCode(HttpStatus.NOT_FOUND.value())
-                    .message("User with given id not found!")
-                    .errorMessages(e.getMessage()).build();
+            throw new DataNotFoundException("User",e.getMessage());
         }
 
         for(RoleRepresentation role:userResource.roles().realmLevel().listAll()){
@@ -153,15 +138,15 @@ public class KeycloakRoleService {
 
         try{
             roleResource.toRepresentation();
-
             roleResource.remove();
-            return CustomResponse.getBuilder().statusCode(HttpStatus.NO_CONTENT.value()).build();
+
+            return CustomResponse
+                    .getBuilder()
+                    .statusCode(HttpStatus.NO_CONTENT.value())
+                    .build();
         }
         catch (Exception e){
-            return CustomResponse.getBuilder()
-                    .message("Given role does not  exists!")
-                    .statusCode(HttpStatus.BAD_REQUEST.value())
-                    .build();
+            throw new DataNotFoundException("Role",e.getMessage());
         }
     }
 }

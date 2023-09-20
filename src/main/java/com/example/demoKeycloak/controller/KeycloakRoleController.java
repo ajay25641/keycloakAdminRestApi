@@ -28,9 +28,9 @@ public class KeycloakRoleController {
 
     @GetMapping("/getallroles")
     public ResponseEntity<CustomResponse> getAllRoles(){
-        CustomResponse customResponse=keycloakRoleService.getAllRoles();
-
-        return ResponseEntity.status(customResponse.getStatusCode()).body(customResponse);
+        return keycloakRoleService
+                .getAllRoles()
+                .responseBuilder();
     }
 
     @PutMapping("/assignroletouser")
@@ -38,9 +38,9 @@ public class KeycloakRoleController {
             @ValidParam @RequestParam String id,
             @ValidParam @RequestParam String roleName){
 
-        CustomResponse customResponse=keycloakRoleService.assignRoleToUser(id,roleName);
-
-        return ResponseEntity.status(customResponse.getStatusCode()).body(customResponse);
+        return keycloakRoleService
+                .assignRoleToUser(id,roleName)
+                .responseBuilder();
     }
 
     @PutMapping("/revokerolefromuser")
@@ -48,16 +48,15 @@ public class KeycloakRoleController {
             @ValidParam @RequestParam String id,
             @ValidParam @RequestParam String roleName){
 
-       CustomResponse customResponse=keycloakRoleService.revokeRoleFromUser(id, roleName);
-
-       return ResponseEntity.status(customResponse.getStatusCode()).body(customResponse);
+       return keycloakRoleService
+               .revokeRoleFromUser(id, roleName)
+               .responseBuilder();
     }
-
 
     @DeleteMapping("/deleterole")
     public ResponseEntity<CustomResponse> deleteRole(@ValidParam @RequestParam String roleName){
-        CustomResponse customResponse=keycloakRoleService.deleteRole(roleName);
-
-        return ResponseEntity.status(customResponse.getStatusCode()).body(customResponse);
+        return keycloakRoleService
+                .deleteRole(roleName)
+                .responseBuilder();
     }
 }
