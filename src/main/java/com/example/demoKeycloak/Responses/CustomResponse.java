@@ -54,13 +54,7 @@ public class CustomResponse {
             return customResponse;
         }
         public ResponseEntity<CustomResponse> responseBuilder(){
-            CustomResponse customResponse=new CustomResponse();
-
-            customResponse.message=this.message;
-            customResponse.errorMessages=this.errorMessages;
-            customResponse.statusCode=this.statusCode;
-            customResponse.data=this.data;
-
+            CustomResponse customResponse=this.build();
             return ResponseEntity.status(customResponse.statusCode).body(customResponse);
         }
     }
