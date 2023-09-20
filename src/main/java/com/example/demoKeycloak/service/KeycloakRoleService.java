@@ -27,19 +27,17 @@ public class KeycloakRoleService {
 
     public CustomResponse createRole(String roleName){
 
-        CustomResponse customResponse=new CustomResponse();
-
         RoleResource roleResource=keycloak.realm(realm).roles().get(roleName);
 
         try{
 
              roleResource.toRepresentation();
 
-             customResponse.setMessage("Role "+roleName+" already exists!");
-             customResponse.setStatusCode(HttpStatus.CONFLICT.value());
-
-             return customResponse;
-
+             return CustomResponse
+                     .getBuilder()
+                     .statusCode(HttpStatus.CONFLICT.value())
+                     .message("Role "+roleName+" already exists!")
+                     .build();
         }
         catch(Exception e){
             RoleRepresentation roleRepresentation=new RoleRepresentation();
@@ -48,12 +46,12 @@ public class KeycloakRoleService {
             keycloak.realm(realm).roles().create(roleRepresentation);
             roleRepresentation=keycloak.realm(realm).roles().get(roleName).toRepresentation();
 
-            customResponse.setStatusCode(HttpStatus.CREATED.value());
-            customResponse.setMessage("Role "+roleName+" created Successfully");
-            customResponse.setData(roleRepresentation);
-
-            return customResponse;
-
+            return CustomResponse
+                    .getBuilder()
+                    .message("Role "+roleName+" created Successfully")
+                    .statusCode(HttpStatus.CREATED.value())
+                    .data(roleRepresentation)
+                    .build();
         }
     }
 
@@ -62,13 +60,18 @@ public class KeycloakRoleService {
 
         List<RoleRepresentation>roleRepresentationList=keycloak.realm(realm).roles().list();
 
-        if(roleRepresentationList.size()==0){
-            customResponse.setMessage("Sorry! No role exists.");
-        }
-        customResponse.setStatusCode(HttpStatus.OK.value());
-        customResponse.setData(roleRepresentationList);
+        String message=null;
 
-        return customResponse;
+        if(roleRepresentationList.isEmpty()){
+            message="Sorry! No role exists.";
+        }
+
+        return CustomResponse
+                .getBuilder()
+                .message(message)
+                .statusCode(HttpStatus.OK.value())
+                .data(roleRepresentationList)
+                .build();
     }
 
     public CustomResponse assignRoleToUser(String userId, String roleName){
@@ -77,41 +80,35 @@ public class KeycloakRoleService {
 
         UserRepresentation userRepresentation;
         RoleRepresentation roleRepresentation;
-
-        CustomResponse customResponse=new CustomResponse();
-
         try{
             userResource.toRepresentation();
         }
         catch(Exception e){
-            customResponse.setStatusCode(HttpStatus.NOT_FOUND.value());
-            customResponse.setMessage("User with given id not found!");
-            customResponse.setErrorMessage(e.getMessage());
-
-            return customResponse;
+            return CustomResponse.getBuilder()
+                    .statusCode(HttpStatus.NOT_FOUND.value())
+                    .message("User with given id not found!")
+                    .errorMessages(e.getMessage()).build();
         }
 
         try{
             roleRepresentation=roleResource.toRepresentation();
         }
         catch (Exception e){
-            customResponse.setStatusCode(HttpStatus.NOT_FOUND.value());
-            customResponse.setMessage("Role with given name does not exists!");
-            customResponse.setErrorMessage(e.getMessage());
+            return CustomResponse.getBuilder()
+                    .statusCode(HttpStatus.NOT_FOUND.value())
+                    .message("Role with given name does not exists!")
+                    .errorMessages(e.getMessage()).build();
 
-            return customResponse;
         }
 
-        userResource.roles().realmLevel().add(Arrays.asList(roleRepresentation));
+        userResource.roles().realmLevel().add(Collections.singletonList(roleRepresentation));
 
         userRepresentation=keycloak.realm(realm).users().get(userId).toRepresentation();
 
-        customResponse.setStatusCode(HttpStatus.OK.value());
-        customResponse.setMessage("Role is assigned to the given user");
-        customResponse.setData(userRepresentation);
-
-        return customResponse;
-
+        return CustomResponse.getBuilder()
+                .statusCode(HttpStatus.OK.value())
+                .message("Role is assigned to the given user.")
+                .data(userRepresentation).build();
     }
 
     public CustomResponse revokeRoleFromUser(String userId,String roleName){
@@ -126,11 +123,10 @@ public class KeycloakRoleService {
             userResource.toRepresentation();
         }
         catch(Exception e){
-            customResponse.setStatusCode(HttpStatus.NOT_FOUND.value());
-            customResponse.setMessage("User with given id not found!");
-            customResponse.setErrorMessage(e.getMessage());
-
-            return customResponse;
+            return CustomResponse.getBuilder()
+                    .statusCode(HttpStatus.NOT_FOUND.value())
+                    .message("User with given id not found!")
+                    .errorMessages(e.getMessage()).build();
         }
 
         for(RoleRepresentation role:userResource.roles().realmLevel().listAll()){
@@ -144,33 +140,28 @@ public class KeycloakRoleService {
 
         userRepresentation=keycloak.realm(realm).users().get(userId).toRepresentation();
 
-        customResponse.setStatusCode(HttpStatus.OK.value());
-        customResponse.setMessage("Role from given user is successfully revoked");
-        customResponse.setData(userRepresentation);
-
-        return customResponse;
+        return CustomResponse.getBuilder()
+                .message("Role from given user is successfully revoked")
+                .statusCode(HttpStatus.OK.value())
+                .data(userRepresentation)
+                .build();
     }
 
 
     public CustomResponse deleteRole(String roleName){
-        CustomResponse customResponse=new CustomResponse();
-
         RoleResource roleResource=keycloak.realm(realm).roles().get(roleName);
 
         try{
             roleResource.toRepresentation();
 
             roleResource.remove();
-
-            customResponse.setStatusCode(HttpStatus.NO_CONTENT.value());
-            customResponse.setMessage("Role is successfully deleted");
-            return customResponse;
+            return CustomResponse.getBuilder().statusCode(HttpStatus.NO_CONTENT.value()).build();
         }
         catch (Exception e){
-            customResponse.setMessage("Given role does not  exists!");
-            customResponse.setStatusCode(HttpStatus.BAD_REQUEST.value());
-
-            return customResponse;
+            return CustomResponse.getBuilder()
+                    .message("Given role does not  exists!")
+                    .statusCode(HttpStatus.BAD_REQUEST.value())
+                    .build();
         }
     }
 }

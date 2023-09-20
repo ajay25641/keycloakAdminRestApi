@@ -20,25 +20,17 @@ public class GlobalExceptionController {
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<CustomResponse> handleMissingParameter(MissingServletRequestParameterException ex){
-
-        CustomResponse customResponse=new CustomResponse();
-
         String parameterName= ex.getParameterName();
 
-        customResponse.setMessage("Parameter "+"'"+parameterName+"'"+" is "+"missing");
-        customResponse.setErrorMessage(ex.getMessage());
-        customResponse.setStatusCode(HttpStatus.BAD_REQUEST.value());
-
-        return ResponseEntity.status(customResponse.getStatusCode()).body(customResponse);
+        return CustomResponse.getBuilder()
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .message("Parameter "+"'"+parameterName+"'"+" is "+"missing")
+                .errorMessages(ex.getMessage())
+                .responseBuilder();
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<CustomResponse> methodArgumentNotValid(MethodArgumentNotValidException ex){
-        CustomResponse customResponse=new CustomResponse();
-
-        customResponse.setStatusCode(HttpStatus.BAD_REQUEST.value());
-        customResponse.setMessage("Some of the field provided by you is not valid or it is missing!");
-
         BindingResult bindingResult=ex.getBindingResult();
 
         List<FieldError> fieldErrorList=bindingResult.getFieldErrors();
@@ -49,17 +41,16 @@ public class GlobalExceptionController {
             messages.add(fieldError.getDefaultMessage());
         }
 
-        customResponse.setErrorMessage(messages);
-
-        return ResponseEntity.status(customResponse.getStatusCode()).body(customResponse);
+        return CustomResponse
+                .getBuilder()
+                .message("Some of the field provided by you is not valid or it is missing!")
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .errorMessages(messages)
+                .responseBuilder();
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<CustomResponse> contraintViolationException(ConstraintViolationException ex){
-
-        CustomResponse customResponse=new CustomResponse();
-        customResponse.setStatusCode(HttpStatus.BAD_REQUEST.value());
-        customResponse.setMessage("Invalid param");
 
         Set<ConstraintViolation<?>> violationSet=ex.getConstraintViolations();
 
@@ -70,19 +61,21 @@ public class GlobalExceptionController {
             messages.add(message);
         }
 
-        customResponse.setErrorMessage(messages);
-
-        return ResponseEntity.status(customResponse.getStatusCode()).body(customResponse);
+        return CustomResponse
+                .getBuilder()
+                .message("Invalid param")
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .errorMessages(messages)
+                .responseBuilder();
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<CustomResponse> genericException(Exception e){
-        CustomResponse customResponse=new CustomResponse();
-
-        customResponse.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-        customResponse.setMessage("Unknown error has occured!");
-        customResponse.setErrorMessage(e.getMessage());
-
-        return ResponseEntity.status(customResponse.getStatusCode()).body(customResponse);
+        return CustomResponse
+                .getBuilder()
+                .message("Unknown error has occured!")
+                .errorMessages(e.getMessage())
+                .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .responseBuilder();
     }
 }

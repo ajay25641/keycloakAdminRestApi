@@ -25,8 +25,6 @@ public class PersonService {
     private Keycloak keycloak;
     public CustomResponse createUser(Person person){
 
-        CustomResponse customResponse=new CustomResponse();
-
         UserRepresentation keyclockUser=new UserRepresentation();
 
         keyclockUser.setEmail(person.getEmail());
@@ -47,61 +45,53 @@ public class PersonService {
         Response response=keycloak.realm(realm).users().create(keyclockUser);
 
         if(response.getStatus()!= HttpStatus.CREATED.value()){
-            customResponse.setMessage("Unable to create User!");
-            customResponse.setStatusCode(response.getStatus());
 
-            return customResponse;
+            return CustomResponse.getBuilder()
+                    .message("Unable to create User!")
+                    .statusCode(response.getStatus())
+                    .build();
         }
 
         UserRepresentation userRepresentation=keycloak.realm(realm).users().searchByEmail(person.getEmail(),true).get(0);
 
-        customResponse.setStatusCode(HttpStatus.CREATED.value());
-        customResponse.setMessage("User created successfully.");
-        customResponse.setData(userRepresentation);
-
-        return customResponse;
-
+        return CustomResponse.getBuilder().message("User created successfully.").statusCode(HttpStatus.CREATED.value()).data(userRepresentation).build();
     }
     public CustomResponse getAllUsers() {
-        CustomResponse customResponse=new CustomResponse();
-
         List<UserRepresentation>userRepresentationList=keycloak.realm(realm).users().list();
 
-        if(userRepresentationList.size()==0){
-            customResponse.setMessage("No User found!");
+        String message=null;
+
+        if(userRepresentationList.isEmpty()){
+            message="No User found!";
         }
 
-        customResponse.setData(userRepresentationList);
-        customResponse.setStatusCode(HttpStatus.OK.value());
-
-        return customResponse;
+        return CustomResponse.getBuilder()
+                .message(message)
+                .statusCode(HttpStatus.OK.value())
+                .data(userRepresentationList)
+                .build();
     }
     public CustomResponse getUserById(String userId){
-
-        CustomResponse customResponse=new CustomResponse();
 
         UserResource userResource=keycloak.realm(realm).users().get(userId);
 
         try{
             UserRepresentation userRepresentation=userResource.toRepresentation();
 
-            customResponse.setStatusCode(HttpStatus.OK.value());
-            customResponse.setData(userRepresentation);
-
-            return customResponse;
-
+            return CustomResponse.getBuilder()
+                    .statusCode(HttpStatus.OK.value())
+                    .data(userRepresentation)
+                    .build();
         }
         catch(Exception e){
-            customResponse.setMessage("User not found!");
-            customResponse.setErrorMessage(e.getMessage());
-
-            customResponse.setStatusCode(HttpStatus.NOT_FOUND.value());
-            return customResponse;
+            return CustomResponse.getBuilder()
+                    .message("User not found!")
+                    .errorMessages(e.getMessage())
+                    .statusCode(HttpStatus.NOT_FOUND.value())
+                    .build();
         }
     }
     public CustomResponse getUserByFieldName(String val,String fieldName){
-        CustomResponse customResponse=new CustomResponse();
-
         List<UserRepresentation> userRepresentationList;
 
         if(fieldName.equals("email")){
@@ -117,35 +107,35 @@ public class PersonService {
             userRepresentationList=keycloak.realm(realm).users().searchByUsername(val,true);
         }
 
-        if(userRepresentationList.size()==0){
-            customResponse.setStatusCode(HttpStatus.NOT_FOUND.value());
-            customResponse.setMessage("No user found with the given "+fieldName+" !");
+        String message=null;
+        if(userRepresentationList.isEmpty()){
+            message="No user found with the given "+fieldName+"!";
         }
-        else{
-            customResponse.setStatusCode(HttpStatus.OK.value());
-        }
-        customResponse.setData(userRepresentationList);
-        return customResponse;
-
+        return CustomResponse.getBuilder()
+                .statusCode(HttpStatus.OK.value())
+                .message(message).data(userRepresentationList)
+                .build();
     }
     public CustomResponse deleteUser(String userId){
-        CustomResponse customResponse=new CustomResponse();
-
         Response response=keycloak.realm(realm).users().delete(userId);
-        customResponse.setStatusCode(response.getStatus());
+
+        String message=null;
 
         if(response.getStatus()==HttpStatus.NOT_FOUND.value()){
-            customResponse.setMessage("User with given id does not exists!");
+            message="User with given id does not exists!";
         }
         else if(response.getStatus()!=HttpStatus.NO_CONTENT.value()){
-            customResponse.setMessage("Unable to delete User!");
+            message="Unable to delete User!";
         }
 
-        return customResponse;
+        return CustomResponse.getBuilder()
+                .message(message)
+                .statusCode(response.getStatus())
+                .build();
 
     }
     public CustomResponse updateUser(Person updatedPerson){
-        CustomResponse customResponse=new CustomResponse();
+
         UserResource userResource=keycloak.realm(realm).users().get(updatedPerson.getId());
 
         try{
@@ -176,22 +166,19 @@ public class PersonService {
 
             existingPerson=keycloak.realm(realm).users().get(updatedPerson.getId()).toRepresentation();
 
-            customResponse.setMessage("User successfully updated");
-            customResponse.setStatusCode(HttpStatus.OK.value());
-            customResponse.setData(existingPerson);
-
-            return customResponse;
-
-
+            return CustomResponse.getBuilder()
+                    .message("User successfully updated")
+                    .statusCode(HttpStatus.OK.value())
+                    .data(existingPerson)
+                    .build();
         }
         catch (Exception e){
-             customResponse.setMessage("User not found with given id!");
-             customResponse.setErrorMessage(e.getMessage());
-             customResponse.setStatusCode(HttpStatus.NOT_FOUND.value());
 
-             return customResponse;
+            return CustomResponse.getBuilder()
+                    .message("User not found with given id!")
+                    .errorMessages(e.getMessage())
+                    .statusCode(HttpStatus.NOT_FOUND.value())
+                    .build();
         }
-
-
     }
 }

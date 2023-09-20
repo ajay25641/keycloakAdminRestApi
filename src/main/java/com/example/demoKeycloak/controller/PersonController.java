@@ -11,12 +11,7 @@ import jakarta.validation.constraints.Email;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BeanPropertyBindingResult;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.Errors;
-import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,24 +26,23 @@ public class PersonController {
     @PostMapping("/createuser")
     public ResponseEntity<CustomResponse> createUser(@Valid @RequestBody Person person){
 
-        CustomResponse customResponse=personService.createUser(person);
-
-        return ResponseEntity.status(customResponse.getStatusCode()).body(customResponse);
-
+        return personService
+                .createUser(person)
+                .responseBuilder();
     }
 
     @GetMapping("/getallusers")
     public ResponseEntity<CustomResponse> getAllUser(){
-        CustomResponse customResponse=personService.getAllUsers();
-
-        return ResponseEntity.status(customResponse.getStatusCode()).body(customResponse);
+        return personService
+                .getAllUsers()
+                .responseBuilder();
     }
     @GetMapping("/getuserbyid")
     public ResponseEntity<CustomResponse> getUserById(@ValidParam @RequestParam String id){
 
-        CustomResponse customResponse=personService.getUserById(id);
-
-        return ResponseEntity.status(customResponse.getStatusCode()).body(customResponse);
+        return personService
+                .getUserById(id)
+                .responseBuilder();
     }
     @GetMapping("/getuserbyfieldname")
     public ResponseEntity<CustomResponse> getUserByFieldName(
@@ -59,8 +53,6 @@ public class PersonController {
 
         String fieldName;
         String fieldVal;
-
-        CustomResponse customResponse;
 
         if(email!=null){
             fieldVal=email;
@@ -79,44 +71,38 @@ public class PersonController {
             fieldName="username";
         }
         else{
-            customResponse=new CustomResponse();
-            customResponse.setStatusCode(HttpStatus.BAD_REQUEST.value());
-            customResponse.setMessage("Please provide the correct field Name!");
-
-            return ResponseEntity.status(customResponse.getStatusCode()).body(customResponse);
+            return CustomResponse.getBuilder()
+                    .statusCode(HttpStatus.BAD_REQUEST.value())
+                    .message("Please provide the correct field Name!")
+                    .responseBuilder();
         }
-        customResponse=personService.getUserByFieldName(fieldVal,fieldName);
-
-        return ResponseEntity.status(customResponse.getStatusCode()).body(customResponse);
+        return personService.getUserByFieldName(fieldVal,fieldName).responseBuilder();
     }
     @PutMapping("/updateuser")
-    public ResponseEntity<CustomResponse> updateUser(@Valid @RequestBody Person person) throws MissingServletRequestParameterException {
+    public ResponseEntity<CustomResponse> updateUser(@Valid @RequestBody Person person) {
 
         CustomResponse customResponse;
 
         if(person.getId()==null || person.getId().length()<=3){
 
-            customResponse=new CustomResponse();
-
-            customResponse.setStatusCode(HttpStatus.BAD_REQUEST.value());
-            customResponse.setMessage("Unable to update user!");
-            customResponse.setErrorMessage("userId must not be blank!");
-
-            return ResponseEntity.status(customResponse.getStatusCode()).body(customResponse);
+            return CustomResponse.getBuilder()
+                    .message("userId must not be blank!")
+                    .statusCode(HttpStatus.BAD_REQUEST.value())
+                    .responseBuilder();
         }
 
-        customResponse=personService.updateUser(person);
-
-        return ResponseEntity.status(customResponse.getStatusCode()).body(customResponse);
+        return personService
+                .updateUser(person)
+                .responseBuilder();
     }
 
 
     @DeleteMapping("/deleteuser")
     public ResponseEntity<CustomResponse> deleteUser(@ValidParam @RequestParam String id){
 
-        CustomResponse customResponse=personService.deleteUser(id);
-
-        return ResponseEntity.status(customResponse.getStatusCode()).body(customResponse);
+        return personService
+                .deleteUser(id)
+                .responseBuilder();
     }
 
 

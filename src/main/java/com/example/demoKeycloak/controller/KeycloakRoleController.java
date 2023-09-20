@@ -4,13 +4,8 @@ package com.example.demoKeycloak.controller;
 import com.example.demoKeycloak.Responses.CustomResponse;
 import com.example.demoKeycloak.Validations.ValidParam;
 import com.example.demoKeycloak.service.KeycloakRoleService;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Size;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,9 +21,9 @@ public class KeycloakRoleController {
     @PostMapping("/createrole")
     public ResponseEntity<CustomResponse> createRole(@ValidParam @RequestParam String roleName){
 
-        CustomResponse customResponse=keycloakRoleService.createRole(roleName);
-
-        return ResponseEntity.status(customResponse.getStatusCode()).body(customResponse);
+        return keycloakRoleService
+                .createRole(roleName)
+                .responseBuilder();
     }
 
     @GetMapping("/getallroles")
